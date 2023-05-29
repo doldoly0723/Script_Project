@@ -111,9 +111,7 @@ class MainGUI:
         root = ET.fromstring(response.text)
 
         for item in root.iter("item"):
-            if item.findtext("dutyName") == self.nameSearch_entry.get():
-                print(item.findtext("dutyName"))
-                print(item.findtext("hpid"))
+            if self.nameSearch_entry.get() in item.findtext("dutyName"):
                 Url = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlBassInfoInqire'
                 Params = {'serviceKey': service_key, "HPID": item.findtext("hpid"), "numOfRows": 10}
                 Response = requests.get(Url, params=Params)
@@ -129,7 +127,7 @@ class MainGUI:
                     HpworkEnd = Item.findtext("dutyTime1c")
                     HpSubject = Item.findtext("dgidIdName")
                     HPworkTime = str(HpworkStart) + "~" + str(HpworkEnd)
-                    subjectList = HpSubject.split(',')
+
 
                     label = Label(self.frame_imformation, text="병원 이름: " + HpName, font=self.TempFont)
                     label.place(x=0, y=ypos)
@@ -144,21 +142,23 @@ class MainGUI:
                     label5 = Label(self.frame_imformation, text="진료 과목", font=self.TempFont)
                     label5.place(x=0, y=ypos + 150)
                     ypos += 180
-                    xpos = 0
-                    cnt = 0
-                    for sub in subjectList:
-                        label5 = Label(self.frame_imformation, text=sub, font=self.TempFont)
-                        label5.place(x=xpos, y=ypos)
-                        if len(sub) > 7:
-                            xpos += 340
-                            cnt += 2
-                        else:
-                            xpos += 170
-                            cnt += 1
-                        if cnt >= 3:
-                            xpos = 0
-                            ypos += 30
-                            cnt = 0
+                    if HpSubject != None:
+                        xpos = 0
+                        cnt = 0
+                        subjectList = HpSubject.split(',')
+                        for sub in subjectList:
+                            label5 = Label(self.frame_imformation, text=sub, font=self.TempFont)
+                            label5.place(x=xpos, y=ypos)
+                            if len(sub) > 7:
+                                xpos += 340
+                                cnt += 2
+                            else:
+                                xpos += 170
+                                cnt += 1
+                            if cnt >= 3:
+                                xpos = 0
+                                ypos += 30
+                                cnt = 0
     def fieldSearch(self):
         pass
     def InitSearch(self):
