@@ -1,3 +1,5 @@
+import requests
+import xml.etree.ElementTree as ET
 from tkinter import*
 from tkinter import font
 from PIL import Image, ImageTk
@@ -58,22 +60,24 @@ class MainGUI:
     def create_nameSearch_frame(self):
         self.NameSearchFrame = Frame(self.SearchWindow, width=1200, height=700)
         self.NameSearchFrame.place(x=0, y=100)
-        frame_left = Frame(self.NameSearchFrame, width=600, height=700,  relief='solid', borderwidth=2)
-        frame_left.place(x=0, y=0)
+        self.Searchframe_left = Frame(self.NameSearchFrame, width=600, height=700,  relief='solid', borderwidth=2)
+        self.Searchframe_left.place(x=0, y=0)
         frame_right = Frame(self.NameSearchFrame, width=600, height=700, relief='solid', borderwidth=2)
         frame_right.place(x=600, y=0)
 
-        label = Label(frame_left, text="검색어:", font=self.TempFont)
-        label.place(x=0, y=10)
 
-        self.nameSearch_entry = Entry(frame_left, relief='solid',font=self.TempFont, width=27)
+        label = Label(self.Searchframe_left, text="검색어:", font=self.TempFont)
+        label.place(x=0,y=10)
+
+        self.nameSearch_entry = Entry(self.Searchframe_left, relief='solid',font=self.TempFont, width=27)
         self.nameSearch_entry.place(x=80, y=10)
 
-        button = Button(frame_left, text='병원 이름 검색', font=self.TempFont, command=self.nameSearch)
+        button = Button(self.Searchframe_left, text='병원 이름 검색', font=self.TempFont, command=self.nameSearch)
         button.place(x=425, y=1)
 
-        frame_information = Frame(frame_left, width=500, height=550, relief='solid', borderwidth=2, bg='red')
-        frame_information.place(x=50, y=100)
+        self.frame_imformation = Frame(self.Searchframe_left, width=500, height=550, relief='solid', borderwidth=2, bg='red')
+        self.frame_imformation.place(x=50, y=100)
+        
     def destroy_nameSearch_frame(self):
         if self.NameSearchFrame:
             self.NameSearchFrame.destroy()
@@ -86,7 +90,75 @@ class MainGUI:
             self.FieldSearchFrame.destroy()
 
     def nameSearch(self):
-        pass
+        self.frame_imformation.destroy()
+        self.frame_imformation = Frame(self.Searchframe_left, width=500, height=550, relief='solid', borderwidth=2,
+                                       bg='red')
+        self.frame_imformation.place(x=50, y=100)
+        """
+        getHsptlMdcncListInfoInqire
+        getHsptlMdcncLcinfoInqire
+        getHsptlBassInfoInqire
+        getBabyListInfoInqire
+        getBabyLcinfoInqire
+        getHsptlMdcncFullDown
+        """
+        url = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire'
+        # 공공데이터포털에서 발급받은 디코딩되지 않은 인증키 입력
+        service_key = "%2Bnq6kOXB0yaZ9BZzYUlRNHDMMcE81wG%2BuSs7gw7I2EBE8aQwTtxTssfXO3g4RPat2f3jmxy7Nht1ya3rpysfPw%3D%3D"
+
+        queryParams = {'serviceKey': service_key, "QN": self.nameSearch_entry.get(), "numOfRows": 100}
+        response = requests.get(url, params=queryParams)
+        root = ET.fromstring(response.text)
+
+        for item in root.iter("item"):
+            if item.findtext("dutyName") == self.nameSearch_entry.get():
+                print(item.findtext("dutyName"))
+                print(item.findtext("hpid"))
+                Url = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlBassInfoInqire'
+                Params = {'serviceKey': service_key, "HPID": item.findtext("hpid"), "numOfRows": 10}
+                Response = requests.get(Url, params=Params)
+                Root = ET.fromstring(Response.text)
+
+                header = ["Name", "Addr", "Tel", "Time"]
+                ypos = 0
+                for Item in Root.iter('item'):
+                    HpName = Item.findtext("dutyName")
+                    Hpaddr = Item.findtext("dutyAddr")
+                    Hptelno = Item.findtext("dutyTel1")
+                    HpworkStart = Item.findtext("dutyTime1s")
+                    HpworkEnd = Item.findtext("dutyTime1c")
+                    HpSubject = Item.findtext("dgidIdName")
+                    HPworkTime = str(HpworkStart) + "~" + str(HpworkEnd)
+                    subjectList = HpSubject.split(',')
+
+                    label = Label(self.frame_imformation, text="병원 이름: " + HpName, font=self.TempFont)
+                    label.place(x=0, y=ypos)
+                    label2 = Label(self.frame_imformation, text="병원 주소: ", font=self.TempFont)
+                    label2.place(x=0, y=ypos + 30)
+                    label2 = Label(self.frame_imformation, text=Hpaddr, font=self.TempFont)
+                    label2.place(x=0, y=ypos + 60)
+                    label3 = Label(self.frame_imformation, text="전화번호: " + Hptelno, font=self.TempFont)
+                    label3.place(x=0, y=ypos + 90)
+                    label4 = Label(self.frame_imformation, text="운영 시간: " + HPworkTime, font=self.TempFont)
+                    label4.place(x=0, y=ypos + 120)
+                    label5 = Label(self.frame_imformation, text="진료 과목", font=self.TempFont)
+                    label5.place(x=0, y=ypos + 150)
+                    ypos += 180
+                    xpos = 0
+                    cnt = 0
+                    for sub in subjectList:
+                        label5 = Label(self.frame_imformation, text=sub, font=self.TempFont)
+                        label5.place(x=xpos, y=ypos)
+                        if len(sub) > 7:
+                            xpos += 340
+                            cnt += 2
+                        else:
+                            xpos += 170
+                            cnt += 1
+                        if cnt >= 3:
+                            xpos = 0
+                            ypos += 30
+                            cnt = 0
     def fieldSearch(self):
         pass
     def InitSearch(self):
