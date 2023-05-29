@@ -99,9 +99,9 @@ class MainGUI:
         frame1.place(x=0, y=0)
         label = Label(frame1, text="병원 검색", font=self.TempFont, bg="gray")  # 라벨 생성
         label.place(relx=0.5, rely=0.5, anchor=CENTER)
+
         # 홈버튼 추가
-        home = Button(self.SearchWindow, width=10, height=5, bg='white', command=self.Home)
-        self.flag = 1       # 어떤 윈도우가 들어왔는지 판별하는 flag
+        home = Button(self.SearchWindow, width=10, height=5, bg='white', command=self.SearchtoHome)
         home.place(x=5, y=5)
 
         self.NameSearchVar = IntVar()  # 이름 검색 체크박스 변수
@@ -128,11 +128,10 @@ class MainGUI:
         self.SymptomWindow.mainloop()
 
     # 홈버튼 함수
-    def Home(self):
-        if self.flag == 1:
-            self.SearchWindow.destroy()
-
+    def SearchtoHome(self):
+        self.SearchWindow.destroy()
         self.InitMain()
+
 
 
 MainGUI()
