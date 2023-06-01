@@ -7,31 +7,77 @@ from PIL import Image, ImageTk
 
 
 class MainGUI:
-    Si_Do_list = ["서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별시",
+    Si_Do_list = ["","서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별시",
                   "경기도", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주특별자치도"]
-    seoul_list = ["강남구", "강동구", "강북구", "강서구", "관악구", "광진구", "구로구", "금천구", "노원구", "도봉구", "동대문구", "동작구", "마포구",
+    seoul_list = ["","강남구", "강동구", "강북구", "강서구", "관악구", "광진구", "구로구", "금천구", "노원구", "도봉구", "동대문구", "동작구", "마포구",
                   "서대문구", "서초구", "성동구", "성북구", "송파구", "양천구", "영등포구", "용산구", "은평구", "종로구", "중구", "중랑구"]
-    busan_list = ["중구", "서구", "동구", "영도구", "부산진구", "동래구", "남구", "북구", "해운대구", "사하구", "금정구", "강서구", "연제구", "수영구", "사상구",
+    busan_list = ["","중구", "서구", "동구", "영도구", "부산진구", "동래구", "남구", "북구", "해운대구", "사하구", "금정구", "강서구", "연제구", "수영구", "사상구",
                   "기장군"]
-    daegu_list = ["중구","동구","서구","남구","북구","수성구","달서구","달성군","군위군"]
-    incheon_list =["중구","동구","미추홀구","연수구","남동구","부평구","계양구","서구","강화군","옹진군"]
-    gwangju_list=["동구","서구","남구","북구","광산구"]
-    daejeon_list=["동구","중구","서구","유성구","대덕구"]
-    ulsan_list=["중구","남구","동구","북구","울주군"]
-    sejong_list=["조치원읍","금남면","부강면","소정면","연기면","연동면","연서면","장군면","전동면","전의면",
+    daegu_list = ["","중구","동구","서구","남구","북구","수성구","달서구","달성군","군위군"]
+    incheon_list =["","중구","동구","미추홀구","연수구","남동구","부평구","계양구","서구","강화군","옹진군"]
+    gwangju_list=["","동구","서구","남구","북구","광산구"]
+    daejeon_list=["","동구","중구","서구","유성구","대덕구"]
+    ulsan_list=["","중구","남구","동구","북구","울주군"]
+    sejong_list=["","조치원읍","금남면","부강면","소정면","연기면","연동면","연서면","장군면","전동면","전의면",
                  "고운동","나성동","다정동","대평동","도담동","반곡동","보람동","소담동","새롬동","아름동","어진동","종촌동","한솔동","해밀동"]
-    gyeonggi_do_list=["수원시","성남시","의정부시","안양시","부천시","광명시","평택시","동두천시","안산시","고양시","과천시","의왕시","구리시","남양주시","오산시","시흥시","군포시",
+    gyeonggi_do_list=["","수원시","성남시","의정부시","안양시","부천시","광명시","평택시","동두천시","안산시","고양시","과천시","의왕시","구리시","남양주시","오산시","시흥시","군포시",
                       "하남시","용인시","파주시","이천시","안성시","김포시","화성시","광주시","양주시","포천시","여주시","연천군","가평군","양평군"]
-    gangwon_do_list=["춘천시","원주시","강릉시","동해시","태백시","속초시","삼척시","홍천군","횡성군","영월군","평창군","정선군","철원군","화천군","양구군","인제군","고성군","양양군"]
-    chung_cheong_bukdo = ["청주시","충주시","제천시","보은군","옥천군","영동군","증평군","진천군","괴산군","음성군","단양군"]
-    chung_cheong_namdo = ["천안시","공주시","보령시","아산시","서산시","논산시","계룡시","당진시","금산군","부여군","서천군","청양군","홍성군","예산군","태안군"]
-    jeolla_bukdo = ["전주시","군산시","익산시","정읍시","남원시","김제시","완주군","진안군","무주군","장수군","임실군","순창군","고창군","부안군"]
-    jeolla_namdo = ["목포시","여수시","순천시","나주시","광양시","담양군","곡성군","구례군","고흥군","보성군",
+    gangwon_do_list=["","춘천시","원주시","강릉시","동해시","태백시","속초시","삼척시","홍천군","횡성군","영월군","평창군","정선군","철원군","화천군","양구군","인제군","고성군","양양군"]
+    chung_cheong_bukdo = ["","청주시","충주시","제천시","보은군","옥천군","영동군","증평군","진천군","괴산군","음성군","단양군"]
+    chung_cheong_namdo = ["","천안시","공주시","보령시","아산시","서산시","논산시","계룡시","당진시","금산군","부여군","서천군","청양군","홍성군","예산군","태안군"]
+    jeolla_bukdo = ["","전주시","군산시","익산시","정읍시","남원시","김제시","완주군","진안군","무주군","장수군","임실군","순창군","고창군","부안군"]
+    jeolla_namdo = ["","목포시","여수시","순천시","나주시","광양시","담양군","곡성군","구례군","고흥군","보성군",
                     "화순군","장흥군","강진군","해남군","영암군","무안군","함평군","영광군","장성군","완도군","진도군","신안군"]
-    gyeongsang_bukdo=["포항시","경주시","김천시","안동시","구미시","영주시","영천시","상주시","문경시","경산시","군위군","의성군",
+    gyeongsang_bukdo=["","포항시","경주시","김천시","안동시","구미시","영주시","영천시","상주시","문경시","경산시","군위군","의성군",
                       "청송군","영양군","영덕군","청도군","고령군","성주군","칠곡군","예천군","봉화군","울진군","울릉군"]
-    gyeongsang_namdo=["창원시","진주시","통영시","사천시","김해시","밀양시","거제시","양산시","의령군","함안군","창녕군","고성군","남해군","하동군","산청군","함양군","거창군","합천군"]
-    jeju_do=["제주시","서귀포시"]
+    gyeongsang_namdo=["","창원시","진주시","통영시","사천시","김해시","밀양시","거제시","양산시","의령군","함안군","창녕군","고성군","남해군","하동군","산청군","함양군","거창군","합천군"]
+    jeju_do=["","제주시","서귀포시"]
+
+    HpSubject_list=["","내과", "소아청소년과", "신경과", "정신건강의학과", "피부과", "외과", "흉부외과", "정형외과", "신경외과", "성형외과",
+               "산부인과", "안과", "이비인후과", "비뇨기과", "재활의학과", "마취통증의학과", "영상의학과", "치료방사선과", "임상병리과",
+               "해부병리과", "가정의학과", "핵의학과", "응급의학과", "치과", "구강악안면외과"]
+    HpSubject_dict={
+        "내과": "D001",
+        "소아청소년과": "D002",
+        "신경과": "D003",
+        "정신건강의학과": "D004",
+        "피부과": "D005",
+        "외과": "D006",
+        "흉부외과": "D007",
+        "정형외과": "D008",
+        "신경외과": "D009",
+        "성형외과": "D010",
+        "산부인과": "D011",
+        "안과": "D012",
+        "이비인후과": "D013",
+        "비뇨기과": "D014",
+        "재활의학과": "D016",
+        "마취통증의학과": "D017",
+        "영상의학과": "D018",
+        "치료방사선과": "D019",
+        "임상병리과": "D020",
+        "해부병리과": "D021",
+        "가정의학과": "D022",
+        "핵의학과": "D023",
+        "응급의학과": "D024",
+        "치과": "D026",
+        "구강악안면외과": "D034"
+    }
+
+    hospital_types = {
+        "종합병원": "A",
+        "병원": "B",
+        "의원": "C",
+        "요양병원": "D",
+        "한방병원": "E",
+        "한의원": "G",
+        "기타": "I",
+        "치과의원": "N",
+        "치과병원": "M",
+        "보건소": "R",
+        "기타(구급차)": "W"
+    }
+
     def __init__(self):
         self.InitMain()
     def InitMain(self):
@@ -142,8 +188,8 @@ class MainGUI:
         self.NameSearchFrame.place(x=0, y=100)
         self.Searchframe_left = Frame(self.NameSearchFrame, width=600, height=700,  relief='solid', borderwidth=2)
         self.Searchframe_left.place(x=0, y=0)
-        frame_right = Frame(self.NameSearchFrame, width=600, height=700, relief='solid', borderwidth=2)
-        frame_right.place(x=600, y=0)
+        self.Searchframe_right = Frame(self.NameSearchFrame, width=600, height=700, relief='solid', borderwidth=2)
+        self.Searchframe_right.place(x=600, y=0)
 
         #시도 콤보박스
         label = Label(self.Searchframe_left, text="시,도 선택", font=self.TempFont)
@@ -192,6 +238,10 @@ class MainGUI:
         self.frame_imformation = Frame(self.Searchframe_left, width=500, height=550, relief='solid', borderwidth=2,
                                        bg='red')
         self.frame_imformation.place(x=50, y=100)
+
+        self.Searchframe_right.destroy()
+        self.Searchframe_right = Frame(self.NameSearchFrame, width=600, height=700, relief='solid', borderwidth=2)
+        self.Searchframe_right.place(x=600, y=0)
         """
         getHsptlMdcncListInfoInqire
         getHsptlMdcncLcinfoInqire
@@ -200,10 +250,10 @@ class MainGUI:
         getBabyLcinfoInqire
         getHsptlMdcncFullDown
         """
+
         url = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire'
         # 공공데이터포털에서 발급받은 디코딩되지 않은 인증키 입력
         service_key = "+nq6kOXB0yaZ9BZzYUlRNHDMMcE81wG+uSs7gw7I2EBE8aQwTtxTssfXO3g4RPat2f3jmxy7Nht1ya3rpysfPw=="
-
         queryParams = {'serviceKey': service_key,"Q0": self.si_do_combo.get(),"Q1": self.sigungu_combo.get(), "QN": self.nameSearch_entry.get(), "numOfRows": 100}
         response = requests.get(url, params=queryParams)
         root = ET.fromstring(response.text)
@@ -257,6 +307,70 @@ class MainGUI:
                                 xpos = 0
                                 ypos += 30
                                 cnt = 0
+                    # 오른쪽에 비슷한 과 출력
+                    # 진료과가 여러개일 경우:
+                    # 의원일 경우 과를 비교 , 아닐 경우 병원 분류명으로 분류
+                    url = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire'
+                    if item.findtext("dutyDivNam") == "의원":
+                        pass
+                    else:
+                        queryParams1 = {'serviceKey': service_key, "Q0": self.si_do_combo.get(),
+                                       "Q1": self.sigungu_combo.get(), "QZ": self.hospital_types[item.findtext("dutyDivNam")],"pageNo": 1, "numOfRows": 20}
+                        response1 = requests.get(url, params=queryParams1)
+                        root1 = ET.fromstring(response1.text)
+                        ypos = 0
+
+                        label = Label(self.Searchframe_right, text="해당 지역 " + item.findtext("dutyDivNam") + " 목록", font=self.TempFont)
+                        label.place(x=0, y=ypos)
+
+                        button_back = Button(self.Searchframe_right, text="->", command=self.back_button, font=self.TempFont)
+                        button_back.place(x=550, y=650)
+                        button_front = Button(self.Searchframe_right, text="<-", command=self.front_button, font=self.TempFont)
+                        button_front.place(x=0, y=650)
+
+                        ypos += 30
+                        for item1 in root1.iter("item"):
+                            hpName = item1.findtext("dutyName")
+                            label = Label(self.Searchframe_right, text=hpName, font=self.TempFont)
+                            label.place(x=0, y=ypos)
+                            ypos+=30
+
+                    """queryParams = {'serviceKey': service_key, "Q0": self.si_do_combo.get(),
+                                   "Q1": self.sigungu_combo.get(),"QD": self.HpSubject_dict[HpSubject], "QN": HpName, "numOfRows": 100}
+                    response = requests.get(url, params=queryParams)
+                    root = ET.fromstring(response.text)"""
+            else:   # 병원 이름이 아닌 치과 이런식으로 병원명 만 적을 때
+                # 미완성
+                if item.findtext("dutyDivNam") == "의원":
+                    pass
+                else:
+                    queryParams1 = {'serviceKey': service_key, "Q0": self.si_do_combo.get(),
+                                    "Q1": self.sigungu_combo.get(),
+                                    "QZ": self.hospital_types[item.findtext("dutyDivNam")], "numOfRows": 100}
+                    response1 = requests.get(url, params=queryParams1)
+                    root1 = ET.fromstring(response1.text)
+                    ypos = 0
+
+                    label = Label(self.Searchframe_right, text="해당 지역 " + item.findtext("dutyDivNam") + " 목록",
+                                  font=self.TempFont)
+                    label.place(x=0, y=ypos)
+                    ypos += 30
+                    hp_cnt = 0
+                    for item1 in root1.iter("item"):
+                        hpName = item1.findtext("dutyName")
+                        label = Label(self.Searchframe_right, text=hpName, font=self.TempFont)
+                        label.place(x=0, y=ypos)
+                        ypos += 30
+                        hp_cnt += 1
+                        """if hp_cnt == 22:    # 최대 출력 개수
+                            break"""
+                break
+                pass
+    def front_button(self):
+        pass
+    def back_button(self):
+        pass
+
     def fieldSearch(self):
         pass
     def InitSearch(self):
