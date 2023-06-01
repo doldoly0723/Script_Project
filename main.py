@@ -78,6 +78,10 @@ class MainGUI:
         "기타(구급차)": "W"
     }
 
+    url1 = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire'
+    url3 = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlBassInfoInqire'
+    service_key = "+nq6kOXB0yaZ9BZzYUlRNHDMMcE81wG+uSs7gw7I2EBE8aQwTtxTssfXO3g4RPat2f3jmxy7Nht1ya3rpysfPw=="
+
     def __init__(self):
         self.InitMain()
     def InitMain(self):
@@ -251,18 +255,15 @@ class MainGUI:
         getHsptlMdcncFullDown
         """
 
-        url = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire'
         # 공공데이터포털에서 발급받은 디코딩되지 않은 인증키 입력
-        service_key = "+nq6kOXB0yaZ9BZzYUlRNHDMMcE81wG+uSs7gw7I2EBE8aQwTtxTssfXO3g4RPat2f3jmxy7Nht1ya3rpysfPw=="
-        queryParams = {'serviceKey': service_key,"Q0": self.si_do_combo.get(),"Q1": self.sigungu_combo.get(), "QN": self.nameSearch_entry.get(), "numOfRows": 100}
-        response = requests.get(url, params=queryParams)
+        queryParams = {'serviceKey': self.service_key,"Q0": self.si_do_combo.get(),"Q1": self.sigungu_combo.get(), "QN": self.nameSearch_entry.get(), "numOfRows": 100}
+        response = requests.get(self.url1, params=queryParams)
         root = ET.fromstring(response.text)
 
         for item in root.iter("item"):
             if self.nameSearch_entry.get() == item.findtext("dutyName"):
-                Url = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlBassInfoInqire'
-                Params = {'serviceKey': service_key, "HPID": item.findtext("hpid"), "numOfRows": 10}
-                Response = requests.get(Url, params=Params)
+                Params = {'serviceKey': self.service_key, "HPID": item.findtext("hpid"), "numOfRows": 10}
+                Response = requests.get(self.url3, params=Params)
                 Root = ET.fromstring(Response.text)
 
                 header = ["Name", "Addr", "Tel", "Time"]
@@ -310,13 +311,14 @@ class MainGUI:
                     # 오른쪽에 비슷한 과 출력
                     # 진료과가 여러개일 경우:
                     # 의원일 경우 과를 비교 , 아닐 경우 병원 분류명으로 분류
-                    url = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire'
                     if item.findtext("dutyDivNam") == "의원":
                         pass
                     else:
-                        queryParams1 = {'serviceKey': service_key, "Q0": self.si_do_combo.get(),
-                                       "Q1": self.sigungu_combo.get(), "QZ": self.hospital_types[item.findtext("dutyDivNam")],"pageNo": 1, "numOfRows": 20}
-                        response1 = requests.get(url, params=queryParams1)
+                        self.page_cnt = 1
+                        self.DivNam = item.findtext("dutyDivNam")
+                        queryParams1 = {'serviceKey': self.service_key, "Q0": self.si_do_combo.get(),
+                                       "Q1": self.sigungu_combo.get(), "QZ": self.hospital_types[item.findtext("dutyDivNam")],"pageNo": self.page_cnt, "numOfRows": 20}
+                        response1 = requests.get(self.url1, params=queryParams1)
                         root1 = ET.fromstring(response1.text)
                         ypos = 0
 
@@ -335,41 +337,96 @@ class MainGUI:
                             label.place(x=0, y=ypos)
                             ypos+=30
 
-                    """queryParams = {'serviceKey': service_key, "Q0": self.si_do_combo.get(),
-                                   "Q1": self.sigungu_combo.get(),"QD": self.HpSubject_dict[HpSubject], "QN": HpName, "numOfRows": 100}
-                    response = requests.get(url, params=queryParams)
-                    root = ET.fromstring(response.text)"""
             else:   # 병원 이름이 아닌 치과 이런식으로 병원명 만 적을 때
                 # 미완성
                 if item.findtext("dutyDivNam") == "의원":
                     pass
                 else:
-                    queryParams1 = {'serviceKey': service_key, "Q0": self.si_do_combo.get(),
+                    self.page_cnt = 1
+                    self.DivNam = item.findtext("dutyDivNam")
+                    queryParams1 = {'serviceKey': self.service_key, "Q0": self.si_do_combo.get(),
                                     "Q1": self.sigungu_combo.get(),
-                                    "QZ": self.hospital_types[item.findtext("dutyDivNam")], "numOfRows": 100}
-                    response1 = requests.get(url, params=queryParams1)
+                                    "QZ": self.hospital_types[item.findtext("dutyDivNam")], "pageNo": self.page_cnt,
+                                    "numOfRows": 20}
+                    response1 = requests.get(self.url1, params=queryParams1)
                     root1 = ET.fromstring(response1.text)
                     ypos = 0
 
                     label = Label(self.Searchframe_right, text="해당 지역 " + item.findtext("dutyDivNam") + " 목록",
                                   font=self.TempFont)
                     label.place(x=0, y=ypos)
+
+                    button_back = Button(self.Searchframe_right, text="->", command=self.front_button,
+                                         font=self.TempFont)
+                    button_back.place(x=550, y=650)
+                    button_front = Button(self.Searchframe_right, text="<-", command=self.back_button,
+                                          font=self.TempFont)
+                    button_front.place(x=0, y=650)
+
                     ypos += 30
-                    hp_cnt = 0
                     for item1 in root1.iter("item"):
                         hpName = item1.findtext("dutyName")
                         label = Label(self.Searchframe_right, text=hpName, font=self.TempFont)
                         label.place(x=0, y=ypos)
                         ypos += 30
-                        hp_cnt += 1
-                        """if hp_cnt == 22:    # 최대 출력 개수
-                            break"""
                 break
                 pass
-    def front_button(self):
-        pass
     def back_button(self):
-        pass
+        if self.page_cnt >=1:
+            self.Searchframe_right.destroy()
+            self.Searchframe_right = Frame(self.NameSearchFrame, width=600, height=700, relief='solid', borderwidth=2)
+            self.Searchframe_right.place(x=600, y=0)
+            self.page_cnt += 1
+            queryParams1 = {'serviceKey': self.service_key, "Q0": self.si_do_combo.get(),
+                            "Q1": self.sigungu_combo.get(), "QZ": self.hospital_types[self.DivNam],
+                            "pageNo": self.page_cnt, "numOfRows": 20}
+            response1 = requests.get(self.url1, params=queryParams1)
+            root1 = ET.fromstring(response1.text)
+            ypos = 0
+
+            label = Label(self.Searchframe_right, text="해당 지역 " + self.DivNam + " 목록",
+                          font=self.TempFont)
+            label.place(x=0, y=ypos)
+
+            button_back = Button(self.Searchframe_right, text="->", command=self.back_button, font=self.TempFont)
+            button_back.place(x=550, y=650)
+            button_front = Button(self.Searchframe_right, text="<-", command=self.front_button, font=self.TempFont)
+            button_front.place(x=0, y=650)
+
+            ypos += 30
+            for item1 in root1.iter("item"):
+                hpName = item1.findtext("dutyName")
+                label = Label(self.Searchframe_right, text=hpName, font=self.TempFont)
+                label.place(x=0, y=ypos)
+                ypos += 30
+    def front_button(self):
+        if self.page_cnt > 1:
+            self.Searchframe_right.destroy()
+            self.Searchframe_right = Frame(self.NameSearchFrame, width=600, height=700, relief='solid', borderwidth=2)
+            self.Searchframe_right.place(x=600, y=0)
+            self.page_cnt -= 1
+            queryParams1 = {'serviceKey': self.service_key, "Q0": self.si_do_combo.get(),
+                            "Q1": self.sigungu_combo.get(), "QZ": self.hospital_types[self.DivNam],
+                            "pageNo": self.page_cnt, "numOfRows": 20}
+            response1 = requests.get(self.url1, params=queryParams1)
+            root1 = ET.fromstring(response1.text)
+            ypos = 0
+
+            label = Label(self.Searchframe_right, text="해당 지역 " + self.DivNam + " 목록",
+                          font=self.TempFont)
+            label.place(x=0, y=ypos)
+
+            button_back = Button(self.Searchframe_right, text="->", command=self.back_button, font=self.TempFont)
+            button_back.place(x=550, y=650)
+            button_front = Button(self.Searchframe_right, text="<-", command=self.front_button, font=self.TempFont)
+            button_front.place(x=0, y=650)
+
+            ypos += 30
+            for item1 in root1.iter("item"):
+                hpName = item1.findtext("dutyName")
+                label = Label(self.Searchframe_right, text=hpName, font=self.TempFont)
+                label.place(x=0, y=ypos)
+                ypos += 30
 
     def fieldSearch(self):
         pass
