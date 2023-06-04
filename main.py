@@ -233,6 +233,34 @@ class MainGUI:
     def create_fieldSearch_frame(self):
         self.FieldSearchFrame = Frame(self.SearchWindow, width=1200, height=700, bg='green')
         self.FieldSearchFrame.place(x=0, y=100)
+
+        # 시도 콤보박스
+        label = Label(self.FieldSearchFrame, text="시,도 선택", font=self.TempFont)
+        label.place(x=0, y=13)
+
+        self.selected_si_gu = StringVar()
+        self.selected_si_gu.set("서울특별시")  # 초기값 설정
+        # gu_options = set(i for i in Si_Do_list)
+        self.si_do_combo = Combobox(self.FieldSearchFrame, textvariable=self.selected_si_gu, values=self.Si_Do_list, font = self.TempFont)
+        self.si_do_combo.place(x=150, y=15)
+
+        label = Label(self.FieldSearchFrame, text="시,군,구 선택", font=self.TempFont)
+        label.place(x=600, y=13)
+        # 시구군 콤보박스
+        self.selected_sigungu = StringVar()
+        self.selected_sigungu.set("강남구")
+        self.sigungu_combo = Combobox(self.FieldSearchFrame, textvariable=self.selected_sigungu, values=self.seoul_list, font=self.TempFont)
+        self.sigungu_combo.place(x=800, y=15)
+
+        self.si_do_combo.bind("<<ComboboxSelected>>", self.Update_ComboBox)
+
+        button = Button(self.FieldSearchFrame, text='검색', font=self.TempFont, command=self.fieldSearch)
+        button.place(x=1100, y=15)
+
+        self.fieldBarChart = Frame(self.FieldSearchFrame, width=1200, height=650, bg='gray')
+        self.fieldBarChart.place(x=0, y=50)
+
+
     def destroy_fieldSearch_frame(self):
         if self.FieldSearchFrame:
             self.FieldSearchFrame.destroy()
@@ -363,6 +391,54 @@ class MainGUI:
                     label.place(x=0, y=ypos)
                     ypos += 30
             break
+    def fieldSearch(self):
+        self.fieldBarChart.destroy()
+        self.fieldBarChart = Frame(self.FieldSearchFrame, width=1200, height=650, bg='gray')
+        self.fieldBarChart.place(x=0, y=50)
+
+        queryParams = {'serviceKey': self.service_key, "Q0": self.si_do_combo.get(), "Q1": self.sigungu_combo.get(),
+                        "numOfRows": 100000}
+        response = requests.get(self.url1, params=queryParams)
+        root = ET.fromstring(response.text)
+        Hpcnt = {}
+        for item in root.iter("item"):
+            HpDivNam = item.findtext("dutyDivNam")
+            if HpDivNam in Hpcnt:
+                Hpcnt[HpDivNam] += 1
+            else:
+                Hpcnt[HpDivNam] = 1
+        # 딕셔너리 생성 완료
+
+        c_width = 1200
+        c_height = 650
+        c = Canvas(self.fieldBarChart, width=c_width, height=c_height, bg='white')
+        c.pack()
+
+        max_value = max(Hpcnt.values())
+        y_stretch = 400 / max_value  # 비율로 막대 높이 조정
+        y_gap = 20
+        x_stretch = 50
+        x_width = 40
+        x_gap = 70
+
+        x = x_gap
+        for label, value in Hpcnt.items():
+            # calculate rectangle coordinates
+            x0 = x
+            y0 = c_height - (value * y_stretch + y_gap)
+            x1 = x + x_width
+            y1 = c_height - y_gap
+
+            # draw the bar
+            c.create_rectangle(x0, y0, x1, y1, fill="red")
+            c.create_text(x0 + 2, y0, anchor=SW, text=str(value))
+
+            # draw the label
+            c.create_text(x0 + x_width // 2, c_height - 5, anchor=S, text=label)
+
+            x += x_width + x_gap
+
+
     def back_button(self):
         if self.page_cnt >=1:
             self.Searchframe_right.destroy()
@@ -420,8 +496,6 @@ class MainGUI:
                 label.place(x=0, y=ypos)
                 ypos += 30
 
-    def fieldSearch(self):
-        pass
     def InitSearch(self):
         self.window.destroy()
         self.SearchWindow = Tk()
