@@ -109,7 +109,7 @@ class MainGUI:
         frame3.place(x=400, y=100)  # 오른쪽에 프레임 배치
 
         self.SearchButton = Button(frame3, text="검색", font=self.TempFont, width=20,height=3, command=self.InitSearch)
-        self.SymptomButton = Button(frame3, text="내 증상", font=self.TempFont, width=20,height=3, command=self.InitSearch)
+        self.SymptomButton = Button(frame3, text="내 증상", font=self.TempFont, width=20,height=3, command=self.InitSymptom)
         self.MapButton = Button(frame3, text="지도", font=self.TempFont, width=20,height=3, command=self.InitSearch)
 
         self.SearchButton.place(relx=0.5, rely=0.2, anchor=CENTER)  # 버튼을 프레임에 배치 (위에서 아래로 순서대로)
@@ -438,7 +438,8 @@ class MainGUI:
 
             x += x_width + x_gap
 
-
+    # 병원 검색을 위한 앞뒤 버튼
+    # 다른 검색과는 호환이 안됨
     def back_button(self):
         if self.page_cnt >=1:
             self.Searchframe_right.destroy()
@@ -528,15 +529,202 @@ class MainGUI:
         self.MapWindow = Tk()
         self.MapWindow.geometry("1200x600")
         self.MapWindow.mainloop()
+
+    def Symptom_next(self):
+        self.frame_detail.destroy()
+        self.frame_detail = Frame(self.SymptomWindow, width=1200, height=650)
+        self.frame_detail.place(x=0, y=150)
+        self.Symptom_nextButton = Button(self.frame_detail, text="->", font=self.TempFont, command=self.Symptom_next)
+        self.Symptom_nextButton.place(x=1170, y=620)
+        self.Symptom_backButton = Button(self.frame_detail, text='<-', font=self.TempFont, command=self.Symptom_back)
+        self.Symptom_backButton.place(x=10, y=620)
+        cnt = 0
+        ypos = 0
+        self.hpid_before = self.hpid_first
+        self.hpid_first = self.hpid_end
+
+        for i in range(self.hpid_first, len(self.Hpid_list)-1):
+            Params = {'serviceKey': self.service_key, "HPID": self.Hpid_list[i], "numOfRows": 10}
+            Response = requests.get(self.url3, params=Params)
+            Root = ET.fromstring(Response.text)
+
+            for item in Root.iter("item"):
+                HpSubject = item.findtext("dgidIdName")
+                if HpSubject:
+                    HpSubject = HpSubject.split(',')
+                else:
+                    HpSubject = []
+                if self.selected_Symptom.get() in HpSubject:
+                    # 병원 이름, 진료과 출력
+                    HpName = item.findtext("dutyName")
+                    Hpaddr = item.findtext("dutyAddr")
+                    Hptelno = item.findtext("dutyTel1")
+                    label = Label(self.frame_detail, text=HpName + "  " + Hpaddr + "  " + Hptelno + " ",font=self.TempFont)
+                    label.place(x=0, y=ypos)
+                    ypos += 20
+                    label_text = ', '.join(HpSubject)
+
+                    label = Label(self.frame_detail, text="진료과" + "  " + label_text)
+                    label.place(x=0, y=ypos)
+                    ypos += 50
+                    cnt += 1
+            if cnt == 9:
+                self.hpid_end = self.Hpid_list.index(self.Hpid_list[i]) + 1
+                break
+    def Symptom_back(self):
+        if self.hpid_before > 0:
+            self.frame_detail.destroy()
+            self.frame_detail = Frame(self.SymptomWindow, width=1200, height=650)
+            self.frame_detail.place(x=0, y=150)
+            self.Symptom_nextButton = Button(self.frame_detail, text="->", font=self.TempFont, command=self.Symptom_next)
+            self.Symptom_nextButton.place(x=1170, y=620)
+            self.Symptom_backButton = Button(self.frame_detail, text='<-', font=self.TempFont, command=self.Symptom_back)
+            self.Symptom_backButton.place(x=10, y=620)
+
+            cnt = 0
+            ypos = 0
+
+            self.hpid_first = self.hpid_before
+            for i in range(self.hpid_first, len(self.Hpid_list) - 1):
+                Params = {'serviceKey': self.service_key, "HPID": self.Hpid_list[i], "numOfRows": 10}
+                Response = requests.get(self.url3, params=Params)
+                Root = ET.fromstring(Response.text)
+
+                for item in Root.iter("item"):
+                    HpSubject = item.findtext("dgidIdName")
+                    if HpSubject:
+                        HpSubject = HpSubject.split(',')
+                    else:
+                        HpSubject = []
+                    if self.selected_Symptom.get() in HpSubject:
+                        # 병원 이름, 진료과 출력
+                        HpName = item.findtext("dutyName")
+                        Hpaddr = item.findtext("dutyAddr")
+                        Hptelno = item.findtext("dutyTel1")
+                        label = Label(self.frame_detail, text=HpName + "  " + Hpaddr + "  " + Hptelno + " ",
+                                      font=self.TempFont)
+                        label.place(x=0, y=ypos)
+                        ypos += 20
+                        label_text = ', '.join(HpSubject)
+
+                        label = Label(self.frame_detail, text="진료과" + "  " + label_text)
+                        label.place(x=0, y=ypos)
+                        ypos += 50
+                        cnt += 1
+                if cnt == 9:
+                    self.hpid_end = self.Hpid_list.index(self.Hpid_list[i]) + 1
+                    break
+    def SearchSymptom(self):
+        queryParams = {'serviceKey': self.service_key, "Q0": self.si_do_combo.get(), "Q1": self.sigungu_combo.get(),
+                        "numOfRows": 50000}
+        response = requests.get(self.url1, params=queryParams)
+        root = ET.fromstring(response.text)
+        self.Hpid_list = []
+        for item in root.iter("item"):
+            self.Hpid_list.append(item.findtext("hpid"))
+        self.Symptom_nextButton = Button(self.frame_detail,text="->", font=self.TempFont, command=self.Symptom_next)
+        self.Symptom_nextButton.place(x=1170, y=620)
+        self.Symptom_backButton = Button(self.frame_detail, text='<-', font = self.TempFont, command=self.Symptom_back)
+        self.Symptom_backButton.place(x=10, y=620)
+
+        cnt = 0
+        ypos = 0
+        self.hpid_before = 0
+        self.hpid_first = 0
+
+        for hpid in self.Hpid_list:
+            Params = {'serviceKey': self.service_key, "HPID": hpid, "numOfRows": 10}
+            Response = requests.get(self.url3, params=Params)
+            Root = ET.fromstring(Response.text)
+
+            for item in Root.iter("item"):
+                HpSubject = item.findtext("dgidIdName")
+                if HpSubject:
+                    HpSubject = HpSubject.split(',')
+                else:
+                    HpSubject = []
+                if self.selected_Symptom.get() in HpSubject:
+                    # 병원 이름, 진료과 출력
+                    HpName = item.findtext("dutyName")
+                    Hpaddr = item.findtext("dutyAddr")
+                    Hptelno = item.findtext("dutyTel1")
+
+                    label = Label(self.frame_detail, text=HpName + "  " + Hpaddr + "  " + Hptelno + " ", font=self.TempFont)
+                    label.place(x=0, y=ypos)
+                    ypos += 20
+                    label_text = ', '.join(HpSubject)
+
+                    label = Label(self.frame_detail, text="진료과" + "  " + label_text)
+                    label.place(x=0, y=ypos)
+                    ypos += 50
+                    cnt += 1
+            if cnt == 9:
+                self.hpid_end = self.Hpid_list.index(hpid) + 1
+                break
+
+
     def InitSymptom(self):
         self.window.destroy()
         self.SymptomWindow = Tk()
-        self.SymptomWindow.geometry("800x600")
+        self.SymptomWindow.geometry("1200x800")
+        self.TempFont = font.Font(size=10, weight='bold', family='Consolas')
+        frame1 = Frame(self.SymptomWindow, width=1200, height=100, bg="gray")
+        frame1.place(x=0, y=0)
+        label = Label(frame1, text="현재 내 증상", font=self.TempFont, bg="gray")  # 라벨 생성
+        label.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+        # 홈버튼 추가
+        home = Button(self.SymptomWindow, width=10, height=5, bg='white', command=self.SymptomtoHome)
+        home.place(x=5, y=5)
+
+        # 콤보박스 만들기 지역, 구, 과
+        # 지역, 구를 고르고 url1에서 해당 병원들 코드 가져와서
+        # url3에서 가져온 코드로 검색하여 과가 해당 과에 존재시 출력?
+        frame_main = Frame(self.SymptomWindow, width=1200, height=50, bg='red')
+        frame_main.place(x=0, y=100)
+
+        # 시도 콤보박스
+        label = Label(frame_main, text="시,도 선택", font=self.TempFont)
+        label.place(x=0, y=10)
+
+        self.selected_si_gu = StringVar()
+        self.selected_si_gu.set("서울특별시")  # 초기값 설정
+        # gu_options = set(i for i in Si_Do_list)
+        self.si_do_combo = Combobox(frame_main, textvariable=self.selected_si_gu, values=self.Si_Do_list)
+        self.si_do_combo.place(x=150, y=15)
+
+
+        # 시구군 콤보박스
+        self.selected_sigungu = StringVar()
+        self.selected_sigungu.set("강남구")
+        self.sigungu_combo = Combobox(frame_main, textvariable=self.selected_sigungu, values=self.seoul_list)
+        self.sigungu_combo.place(x=350, y=15)
+
+        self.si_do_combo.bind("<<ComboboxSelected>>", self.Update_ComboBox)
+
+        label= Label(frame_main, text="진료과 선택", font=self.TempFont)
+        label.place(x=600, y=10)
+
+        #과 콤보박스
+        self.selected_Symptom = StringVar()
+        self.selected_Symptom.set("내과")
+        self.Hpsubject_combo = Combobox(frame_main, textvariable=self.selected_Symptom, values=self.HpSubject_list)
+        self.Hpsubject_combo.place(x=750, y=15)
+
+        button = Button(frame_main, text='검색', font=self.TempFont, command=self.SearchSymptom)
+        button.place(x=1100, y=7)
+
+        self.frame_detail = Frame(self.SymptomWindow, width= 1200, height=650)
+        self.frame_detail.place(x=0, y=150)
+
         self.SymptomWindow.mainloop()
 
     # 홈버튼 함수
     def SearchtoHome(self):
         self.SearchWindow.destroy()
+        self.InitMain()
+    def SymptomtoHome(self):
+        self.SymptomWindow.destroy()
         self.InitMain()
 
 
