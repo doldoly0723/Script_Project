@@ -2,15 +2,9 @@
 """import telepot
 import noti"""
 
-import sys
-import time
-import sqlite3
+
 import telepot
-from pprint import pprint
-from urllib.request import urlopen
-import re
-from datetime import date, datetime, timedelta
-import traceback
+
 
 import noti
 
@@ -60,17 +54,3 @@ def handle(msg):
         noti.sendMessage(chat_id, '모르는 명령어입니다.')
 
 
-today = date.today()
-current_month = today.strftime('%Y%m')
-
-print( '[',today,']received token :', noti.TOKEN )
-
-bot = telepot.Bot(noti.TOKEN)
-pprint( bot.getMe() )
-
-bot.message_loop(handle)
-
-print('Listening...')
-
-while 1:
-  time.sleep(10)

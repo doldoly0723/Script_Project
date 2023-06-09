@@ -4,9 +4,18 @@ from tkinter import*
 from tkinter import font
 from tkinter.ttk import Combobox
 from PIL import Image, ImageTk
+import telepot
+import teller
+import noti
 
-
-
+from pprint import pprint
+from urllib.request import urlopen
+import re
+from datetime import date, datetime, timedelta
+import traceback
+import sys
+import time
+import sqlite3
 
 class MainGUI:
     Si_Do_list = ["","서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별시",
@@ -118,6 +127,17 @@ class MainGUI:
         self.SymptomButton.place(relx=0.5, rely=0.5, anchor=CENTER)
         self.MapButton.place(relx=0.5, rely=0.8, anchor=CENTER)
 
+        today = date.today()
+        current_month = today.strftime('%Y%m')
+
+        print('[', today, ']received token :', noti.TOKEN)
+
+        bot = telepot.Bot(noti.TOKEN)
+        pprint(bot.getMe())
+
+        bot.message_loop(teller.handle)
+
+        print('Listening...')
 
 
         self.window.mainloop()
