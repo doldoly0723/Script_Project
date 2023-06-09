@@ -6,6 +6,8 @@ from tkinter.ttk import Combobox
 from PIL import Image, ImageTk
 
 
+
+
 class MainGUI:
     Si_Do_list = ["","서울특별시", "부산광역시", "대구광역시", "인천광역시", "광주광역시", "대전광역시", "울산광역시", "세종특별시",
                   "경기도", "강원도", "충청북도", "충청남도", "전라북도", "전라남도", "경상북도", "경상남도", "제주특별자치도"]
@@ -115,6 +117,8 @@ class MainGUI:
         self.SearchButton.place(relx=0.5, rely=0.2, anchor=CENTER)  # 버튼을 프레임에 배치 (위에서 아래로 순서대로)
         self.SymptomButton.place(relx=0.5, rely=0.5, anchor=CENTER)
         self.MapButton.place(relx=0.5, rely=0.8, anchor=CENTER)
+
+
 
         self.window.mainloop()
 
@@ -287,7 +291,7 @@ class MainGUI:
         queryParams = {'serviceKey': self.service_key,"Q0": self.si_do_combo.get(),"Q1": self.sigungu_combo.get(), "QN": self.nameSearch_entry.get(), "numOfRows": 100}
         response = requests.get(self.url1, params=queryParams)
         root = ET.fromstring(response.text)
-
+        print(response.text)
         for item in root.iter("item"):
             if self.nameSearch_entry.get() == item.findtext("dutyName"):
                 Params = {'serviceKey': self.service_key, "HPID": item.findtext("hpid"), "numOfRows": 10}
