@@ -36,6 +36,47 @@ def getSearchData(sido, sidogun, Hpname):
                 data_dict["HPworkTime"] = str(HpworkStart) + "~" + str(HpworkEnd)
                 return data_dict
 
+def getHpcntDate(sido, sidogun):
+    queryParams = {'serviceKey': service_key, "Q0": sido, "Q1": sidogun,
+                   "numOfRows": 100000}
+    response = requests.get(url1, params=queryParams)
+    root = ET.fromstring(response.text)
+    Hpcnt = {}
+    for item in root.iter("item"):
+        HpDivNam = item.findtext("dutyDivNam")
+        if HpDivNam in Hpcnt:
+            Hpcnt[HpDivNam] += 1
+        else:
+            Hpcnt[HpDivNam] = 1
+    return Hpcnt
+def getHpSubject_data(user, sido, sidogun, HpSymptom):
+    queryParams = {'serviceKey': service_key, "Q0": sido, "Q1": sidogun,
+                   "numOfRows": 50000}
+    response = requests.get(url1, params=queryParams)
+    root = ET.fromstring(response.text)
+    Hpid_list = []
+    for item in root.iter("item"):
+        Hpid_list.append(item.findtext("hpid"))
+
+    HpSymptom_list=[]
+
+    for hpid in Hpid_list:
+        Params = {'serviceKey': service_key, "HPID": hpid, "numOfRows": 10}
+        Response = requests.get(url3, params=Params)
+        Root = ET.fromstring(Response.text)
+        for item in Root.iter("item"):
+            HpSubject = item.findtext("dgidIdName")
+            if HpSubject:
+                HpSubject = HpSubject.split(',')
+            else:
+                HpSubject = []
+            if HpSymptom in HpSubject:
+                # 병원 이름, 진료과 출력
+                HpName = item.findtext("dutyName")
+                Hpaddr = item.findtext("dutyAddr")
+                Hptelno = item.findtext("dutyTel1")
+                msg = HpName + '\n' + Hpaddr + '\n' + Hptelno + '\n' + str(HpSubject) + '\n'
+                sendMessage(user, msg)
 
 def sendMessage(user, msg):
     try:

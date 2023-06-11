@@ -21,10 +21,17 @@ def telSearch(user, sido, sidogun, Hpname):
     noti.sendMessage(user, msg)
 
 def telHpcnt(user, sido, sidogun):
-    pass
+    Hpcnt_data = noti.getHpcntDate(sido,sidogun)
+    msg = ''
+    msg = "해당 도시의 병원 분류명 개수" + '\n'
+    for key in Hpcnt_data:
+        msg += key + ": " + str(Hpcnt_data[key]) + '개\n'
+
+    noti.sendMessage(user, msg)
 
 def telHpSubject(user, sido, sidogun, Hpsubject):
-    pass
+    noti.getHpSubject_data(user, sido, sidogun, Hpsubject)
+
 
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
@@ -47,10 +54,10 @@ def handle(msg):
         telHpcnt(chat_id, args[1], args[2])
 
     # 진료과 서울시 종로구 내과
-    elif text.startswith('진료과') and len(args) >= 4:
+    elif text.startswith('진료과검색') and len(args) >= 4:
         telHpSubject(chat_id, args[1], args[2], args[3])
 
     else:
-        noti.sendMessage(chat_id, '모르는 명령어입니다.')
+        noti.sendMessage(chat_id, '모르는 명령어입니다.\n검색 시구 시군구 병원이름\n병원현황 시구 시군구\n진료과검색 시구 시군구 진료과\n으로 검색해주세요')
 
 

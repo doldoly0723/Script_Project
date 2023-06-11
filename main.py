@@ -93,6 +93,21 @@ class MainGUI:
     url3 = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlBassInfoInqire'
     service_key = "+nq6kOXB0yaZ9BZzYUlRNHDMMcE81wG+uSs7gw7I2EBE8aQwTtxTssfXO3g4RPat2f3jmxy7Nht1ya3rpysfPw=="
 
+
+    # 텔레그램 연동을 위한 코드
+    today = date.today()
+    current_month = today.strftime('%Y%m')
+
+    print('[', today, ']received token :', noti.TOKEN)
+
+    bot = telepot.Bot(noti.TOKEN)
+    pprint(bot.getMe())
+
+    bot.message_loop(teller.handle)
+
+    print('Listening...')
+
+
     def __init__(self):
         self.InitMain()
     def InitMain(self):
@@ -126,18 +141,6 @@ class MainGUI:
         self.SearchButton.place(relx=0.5, rely=0.2, anchor=CENTER)  # 버튼을 프레임에 배치 (위에서 아래로 순서대로)
         self.SymptomButton.place(relx=0.5, rely=0.5, anchor=CENTER)
         self.MapButton.place(relx=0.5, rely=0.8, anchor=CENTER)
-
-        today = date.today()
-        current_month = today.strftime('%Y%m')
-
-        print('[', today, ']received token :', noti.TOKEN)
-
-        bot = telepot.Bot(noti.TOKEN)
-        pprint(bot.getMe())
-
-        bot.message_loop(teller.handle)
-
-        print('Listening...')
 
 
         self.window.mainloop()
