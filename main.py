@@ -17,7 +17,7 @@ import traceback
 import sys
 import time
 import sqlite3
-
+import spam
 
 class MainGUI:
     # 지역 정보
@@ -108,7 +108,7 @@ class MainGUI:
 
     url1 = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlMdcncListInfoInqire'
     url3 = 'http://apis.data.go.kr/B552657/HsptlAsembySearchService/getHsptlBassInfoInqire'
-    service_key = "+nq6kOXB0yaZ9BZzYUlRNHDMMcE81wG+uSs7gw7I2EBE8aQwTtxTssfXO3g4RPat2f3jmxy7Nht1ya3rpysfPw=="
+    service_key = spam.spam_key()
 
     # 텔레그램 연동을 위한 코드
     today = date.today()
@@ -642,7 +642,7 @@ class MainGUI:
 
         # frame1 텍스트 라벨
         label = Label(frame1, text='병원 이름 검색', font=MapFont, fg='black', bg='#ed5151')
-        label.place(x=220, y=40)
+        label.place(x=200, y=40)
 
         # 검색창
         self.search_bar = Entry(frame1, width=80)
@@ -695,6 +695,8 @@ class MainGUI:
         self.search_bar.delete(0, last=tkinter.END)
 
     def Symptom_next(self):
+        self.index_value += 1
+
         self.frame_detail.destroy()
         self.frame_detail = Frame(self.SymptomWindow, width=1200, height=650)
         self.frame_detail.place(x=0, y=150)
@@ -706,10 +708,8 @@ class MainGUI:
         self.Symptom_backButton.place(x=10, y=620)
         cnt = 0
         ypos = 0
-        self.hpid_before = self.hpid_first
-        self.hpid_first = self.hpid_end
 
-        for i in range(self.hpid_first, len(self.Hpid_list)-1):
+        for i in range(self.index_list[self.index_value], len(self.Hpid_list)-1):
             Params = {'serviceKey': self.service_key, "HPID": self.Hpid_list[i], "numOfRows": 10}
             Response = requests.get(self.url3, params=Params)
             Root = ET.fromstring(Response.text)
@@ -736,10 +736,13 @@ class MainGUI:
                     ypos += 50
                     cnt += 1
             if cnt == 9:
-                self.hpid_end = self.Hpid_list.index(self.Hpid_list[i]) + 1
+                self.index_list.append(self.Hpid_list.index(self.Hpid_list[i]) + 1)
                 break
+
     def Symptom_back(self):
-        if self.hpid_before > 0:
+        if self.index_value != 0:
+            self.index_value -= 1
+
             self.frame_detail.destroy()
             self.frame_detail = Frame(self.SymptomWindow, width=1200, height=650)
             self.frame_detail.place(x=0, y=150)
@@ -753,8 +756,7 @@ class MainGUI:
             cnt = 0
             ypos = 0
 
-            self.hpid_first = self.hpid_before
-            for i in range(self.hpid_first, len(self.Hpid_list) - 1):
+            for i in range(self.index_list[self.index_value], len(self.Hpid_list) - 1):
                 Params = {'serviceKey': self.service_key, "HPID": self.Hpid_list[i], "numOfRows": 10}
                 Response = requests.get(self.url3, params=Params)
                 Root = ET.fromstring(Response.text)
@@ -781,7 +783,7 @@ class MainGUI:
                         ypos += 50
                         cnt += 1
                 if cnt == 9:
-                    self.hpid_end = self.Hpid_list.index(self.Hpid_list[i]) + 1
+                    self.index_list.pop()
                     break
 
     def SearchSymptom(self):
@@ -805,8 +807,8 @@ class MainGUI:
 
         cnt = 0
         ypos = 0
-        self.hpid_before = 0
-        self.hpid_first = 0
+        self.index_list = [0]
+        self.index_value = 0
 
         for hpid in self.Hpid_list:
             Params = {'serviceKey': self.service_key, "HPID": hpid, "numOfRows": 10}
@@ -836,7 +838,7 @@ class MainGUI:
                     ypos += 50
                     cnt += 1
             if cnt == 9:
-                self.hpid_end = self.Hpid_list.index(hpid) + 1
+                self.index_list.append(self.Hpid_list.index(hpid) + 1)
                 break
 
     def symptomInfo(self):
