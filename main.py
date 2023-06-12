@@ -612,19 +612,26 @@ class MainGUI:
         if self.search_bar.get() == '':
             pass
         else:
+            # 마커 초기화
+            self.map_widget.delete_all_marker()
+
             # 데이터 불러오기 (수정)
-            queryParams = {'serviceKey': self.service_key, "QN":self.search_bar.get(), "numOfRows": 1000}
+            queryParams = {'serviceKey': self.service_key, "QN": self.search_bar.get(), "numOfRows": 10000}
             response = requests.get(self.url1, params=queryParams)
             root = ET.fromstring(response.text)
-            self.Hp_marker_list = {}
+            marker_dict = {}
             for item in root.iter("item"):
                 HpName = item.findtext('dutyName')
-                HpLongitude = float(item.findtext('wgs84Lon'))
-                HpLatitude = float(item.findtext('wgs84Lat'))
-                self.Hp_marker_list[HpName] = [HpLatitude, HpLongitude]
-                print(HpLatitude, HpLongitude, HpName)
-                self.map_widget.set_position(HpLatitude, HpLongitude, text=HpName, marker=True)
+                HpLongitude = str(round(float(item.findtext('wgs84Lon')), 4))
+                HpLatitude = str(round(float(item.findtext('wgs84Lat')), 4))
+                if HpLatitude+' '+HpLongitude not in marker_dict:
+                    marker_dict[HpLatitude+' '+HpLongitude] = [HpName]
+                else:
+                    marker_dict[HpLatitude + ' ' + HpLongitude][0] += ', '+HpName
 
+            for k, v in marker_dict.items():
+                lat, long = k.split()
+                self.map_widget.set_marker(float(lat), float(long), text=v[0])
 
     def clear(self):
         self.search_bar.delete(0, last=tkinter.END)
