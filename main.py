@@ -556,16 +556,22 @@ class MainGUI:
         WIDTH = 1200
         HEIGHT = 800
 
+        # 폰트
+        MapFont = font.Font(size=12, weight='bold', family='맑은 고딕')
+
         self.window.destroy()
         self.mapwindow = Tk()
 
         self.mapwindow.title("지도")
         self.mapwindow.geometry(f"{WIDTH}x{HEIGHT}")
 
-        self.mapwindow.grid_columnconfigure(0, weight=1)
-        self.mapwindow.grid_columnconfigure(1, weight=0)
-        self.mapwindow.grid_columnconfigure(2, weight=0)
-        self.mapwindow.grid_rowconfigure(1, weight=1)
+        # 상단 프레임
+        frame1 = Frame(self.mapwindow, width=1200, height=100, bg="#ed5151")
+        frame1.place(x=0, y=0)
+
+        # 지도 프레임
+        frame2 = Frame(self.mapwindow, width=1200, height=700, bg="black")
+        frame2.place(x=0, y=100)
 
         # 버튼 이미지
         home_image = Image.open('image/Home.png').resize((40, 40))
@@ -576,116 +582,52 @@ class MainGUI:
                       command=self.MaptoHome)
         home.place(x=5, y=5)
 
+        # frame1 텍스트 라벨
+        label = Label(frame1, text='병원 이름 검색', font=MapFont, fg='black', bg='#ed5151')
+        label.place(x=220, y=40)
+
         # 검색창
-        self.search_bar = Entry(self.mapwindow, width=40)
-        self.search_bar.grid(row=0, column=0, pady=42, padx=150, sticky="we")
+        self.search_bar = Entry(frame1, width=80)
+        self.search_bar.place(x=350, y=40)
         self.search_bar.focus()
 
         # 검색 버튼
-        self.search_bar_button = tkinter.Button(master=self.mapwindow, width=8, text="Search", command=self.search)
-        self.search_bar_button.grid(row=0, column=1, pady=10, padx=10)
+        self.search_bar_button = Button(master=frame1, width=10, text="Search", command=self.search, bg='white')
+        self.search_bar_button.place(x=1000, y=36)
 
         # 검색 초기화 버튼
-        self.search_bar_clear = Button(master=self.mapwindow, width=8, text="Clear", command=self.clear)
-        self.search_bar_clear.grid(row=0, column=2, pady=10, padx=10)
+        self.search_bar_clear = Button(master=frame1, width=10, text="Clear", command=self.clear, bg='white')
+        self.search_bar_clear.place(x=1100, y=36)
 
         # 지도
-        self.map_widget = TkinterMapView(width=WIDTH, height=600, corner_radius=0)
-        self.map_widget.grid(row=1, column=0, columnspan=3, sticky="nsew")
-
-        # 마커 리스트 박스
-        self.marker_list_box = Listbox(self.mapwindow, height=8)
-        self.marker_list_box.grid(row=2, column=0, columnspan=1, sticky="ew", padx=10, pady=10)
-
-        # 리스트 박스 버튼 프레임
-        self.listbox_button_frame = Frame(master=self.mapwindow)
-        self.listbox_button_frame.grid(row=2, column=1, sticky="nsew", columnspan=2)
-
-        self.listbox_button_frame.grid_columnconfigure(0, weight=1)
-
-        # 마커 세이브 버튼
-        self.save_marker_button = Button(master=self.listbox_button_frame, width=20, text="save current marker",
-                                         command=self.save_marker)
-        self.save_marker_button.grid(row=0, column=0, pady=10, padx=10)
-
-        # 마커 초기화 버튼
-        self.clear_marker_button = Button(master=self.listbox_button_frame, width=20, text="clear marker list",
-                                          command=self.clear_marker_list)
-        self.clear_marker_button.grid(row=1, column=0, pady=10, padx=10)
-
-        # 마커 연결 버튼
-        self.connect_marker_button = Button(master=self.listbox_button_frame, width=20, text="connect marker with path",
-                                            command=self.connect_marker)
-        self.connect_marker_button.grid(row=2, column=0, pady=10, padx=10)
+        self.map_widget = TkinterMapView(width=WIDTH-20, height=700-20)
+        self.map_widget.place(x=10, y=110)
 
         # 초기 화면
         self.map_widget.set_address('seoul')
 
-        # 데이터 불러오기 (수정)
-        # queryParams = {'serviceKey': self.service_key, "numOfRows": 100}
-        # response = requests.get(self.url1, params=queryParams)
-        # root = ET.fromstring(response.text)
-        # self.Hp_marker_list = {}
-        # for item in root.iter("item"):
-        #     HpName = item.findtext('dutyName')
-        #     HpLongitude = item.findtext('wgs84Lon')
-        #     HpLatitude = item.findtext('wgs84Lat')
-        #     self.Hp_marker_list[HpName] = [HpLongitude, HpLatitude]
-        #
-        # for k, v in self.Hp_marker_list.items():
-        #     self.map_widget.set_position(v[0], v[1], text=k, marker=True)
-
-        self.marker_list = []
-        self.marker_path = None
-
-        self.search_marker = None
-        self.search_in_progress = False
-
         self.mapwindow.mainloop()
 
     def search(self):
-        if not self.search_in_progress:
-            self.search_in_progress = True
-            if self.search_marker not in self.marker_list:
-                self.map_widget.delete(self.search_marker)
+        if self.search_bar.get() == '':
+            pass
+        else:
+            # 데이터 불러오기 (수정)
+            queryParams = {'serviceKey': self.service_key, "QN":self.search_bar.get(), "numOfRows": 1000}
+            response = requests.get(self.url1, params=queryParams)
+            root = ET.fromstring(response.text)
+            self.Hp_marker_list = {}
+            for item in root.iter("item"):
+                HpName = item.findtext('dutyName')
+                HpLongitude = float(item.findtext('wgs84Lon'))
+                HpLatitude = float(item.findtext('wgs84Lat'))
+                self.Hp_marker_list[HpName] = [HpLatitude, HpLongitude]
+                print(HpLatitude, HpLongitude, HpName)
+                self.map_widget.set_position(HpLatitude, HpLongitude, text=HpName, marker=True)
 
-            address = self.search_bar.get()
-            self.search_marker = self.map_widget.set_address(address, marker=True)
-            if self.search_marker is False:
-                # address was invalid (return value is False)
-                self.search_marker = None
-            self.search_in_progress = False
-
-    def save_marker(self):
-        if self.search_marker is not None:
-            self.marker_list_box.insert(tkinter.END, f" {len(self.marker_list)}. {self.search_marker.text} ")
-            self.marker_list_box.see(tkinter.END)
-            self.marker_list.append(self.search_marker)
-
-    def clear_marker_list(self):
-        for marker in self.marker_list:
-            self.map_widget.delete(marker)
-
-        self.marker_list_box.delete(0, tkinter.END)
-        self.marker_list.clear()
-        self.connect_marker()
-
-    def connect_marker(self):
-        print(self.marker_list)
-        position_list = []
-
-        for marker in self.marker_list:
-            position_list.append(marker.position)
-
-        if self.marker_path is not None:
-            self.map_widget.delete(self.marker_path)
-
-        if len(position_list) > 0:
-            self.marker_path = self.map_widget.set_path(position_list)
 
     def clear(self):
         self.search_bar.delete(0, last=tkinter.END)
-        self.map_widget.delete(self.search_marker)
 
     def InitSymptom(self):
         self.window.destroy()
