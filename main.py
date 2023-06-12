@@ -4,6 +4,9 @@ from tkinter import*
 from tkinter import font
 from tkinter.ttk import Combobox
 from PIL import Image, ImageTk
+import math
+import tkinter.messagebox
+from tkintermapview import TkinterMapView
 
 
 class MainGUI:
@@ -88,8 +91,9 @@ class MainGUI:
         self.window = Tk()
         self.window.title("우리 동네 병원 찾기")
         self.window.geometry("800x600")
-        self.TempFont = font.Font(size=20, weight='bold', family='Consolas')
-        self.TempFont2 = font.Font(size=16, weight='bold', family='Consolas')
+        self.TempFont = font.Font(size=20, weight='bold', family='맑은 고딕')
+        self.TempFont2 = font.Font(size=16, weight='bold', family='맑은 고딕')
+        self.mainscreenfont = font.Font(size=24, weight='bold', family='맑은 고딕')
 
         # 프레임 구분을 위해 색칠
         frame1 = Frame(self.window, width=800, height=100, bg='#efefef')  # 상단 프레임 생성
@@ -99,18 +103,32 @@ class MainGUI:
 
         frame2 = Frame(self.window, width=400, height=500, bg='white')  # 왼쪽 프레임 생성
         frame2.place(x=0, y=100)  # 왼쪽에 프레임 배치
-        # 병원 이미지(로고)
-        logo_image = Image.open('image/병원마크.png')
-        image_tk = ImageTk.PhotoImage(logo_image)
-        image_label = Label(frame2, image=image_tk)
-        image_label.place(x=72, y=122)
 
-        frame3 = Frame(self.window, width=400, height=500, bg='#e74b47')  # 오른쪽 프레임 생성
+        # 병원 이미지(로고)
+        logo_image = Image.open('image/Cross.png').resize((200, 200))
+        logo_image_tk = ImageTk.PhotoImage(logo_image)
+        image_label = Label(frame2, image=logo_image_tk, bg='white')
+        image_label.place(x=100, y=150)
+
+        frame3 = Frame(self.window, width=400, height=500, bg='#ed5151')  # 오른쪽 프레임 생성
         frame3.place(x=400, y=100)  # 오른쪽에 프레임 배치
 
-        self.SearchButton = Button(frame3, text="검색", font=self.TempFont, width=20,height=3, command=self.InitSearch)
-        self.SymptomButton = Button(frame3, text="내 증상", font=self.TempFont, width=20,height=3, command=self.InitSearch)
-        self.MapButton = Button(frame3, text="지도", font=self.TempFont, width=20,height=3, command=self.InitSearch)
+        # 버튼 이미지
+        search_image = Image.open('image/Search.png').resize((40, 40))
+        search_image_tk = ImageTk.PhotoImage(search_image)
+
+        symptom_image = Image.open('image/Symptom.png').resize((40, 40))
+        symptom_image_tk = ImageTk.PhotoImage(symptom_image)
+
+        map_image = Image.open('image/Map.png').resize((40, 40))
+        map_image_tk = ImageTk.PhotoImage(map_image)
+
+        self.SearchButton = Button(frame3, text="검색", image=search_image_tk, compound='left', font=self.mainscreenfont,
+                                   width=300, height=100, command=self.InitSearch)
+        self.SymptomButton = Button(frame3, text="증상", image=symptom_image_tk, compound='left',
+                                    font=self.mainscreenfont, width=300, height=100, command=self.InitSymptom)
+        self.MapButton = Button(frame3, text="지도", image=map_image_tk, compound='left', font=self.mainscreenfont,
+                                width=300, height=100, command=self.InitMap)
 
         self.SearchButton.place(relx=0.5, rely=0.2, anchor=CENTER)  # 버튼을 프레임에 배치 (위에서 아래로 순서대로)
         self.SymptomButton.place(relx=0.5, rely=0.5, anchor=CENTER)
@@ -500,21 +518,32 @@ class MainGUI:
         self.window.destroy()
         self.SearchWindow = Tk()
         self.SearchWindow.geometry("1200x800")
-        self.TempFont = font.Font(size=16, weight='bold', family='Consolas')
+
+        # 폰트
+        self.TempFont = font.Font(size=12, weight='bold', family='맑은 고딕')
+        self.TempFont2 = font.Font(size=16, weight='bold', family='맑은 고딕')
+        self.mainscreenfont = font.Font(size=24, weight='bold', family='맑은 고딕')
+
+        # 버튼 이미지
+        self.home_image = Image.open('image/Home.png').resize((40, 40))
+        self.home_image_tk = ImageTk.PhotoImage(self.home_image)
 
         frame1 = Frame(self.SearchWindow, width=1200, height=100, bg="gray")
         frame1.place(x=0, y=0)
-        label = Label(frame1, text="병원 검색", font=self.TempFont, bg="gray")  # 라벨 생성
+        label = Label(frame1, text="병원 검색", font=self.mainscreenfont, bg="gray")  # 라벨 생성
         label.place(relx=0.5, rely=0.5, anchor=CENTER)
 
         # 홈버튼 추가
-        home = Button(self.SearchWindow, width=10, height=5, bg='white', command=self.SearchtoHome)
+        home = Button(self.SearchWindow, width=85, height=85, image=self.home_image_tk, bg='white',
+                      command=self.SearchtoHome)
         home.place(x=5, y=5)
 
         self.NameSearchVar = IntVar()  # 이름 검색 체크박스 변수
         self.FieldSearchVar = IntVar()
-        self.NameSearchCheckbox = Checkbutton(frame1, text="이름 검색",font=self.TempFont, variable=self.NameSearchVar, bg='gray', command=self.check_name_search)
-        self.FieldSearchCheckbox = Checkbutton(frame1, text="분야 검색",font=self.TempFont, variable=self.FieldSearchVar, bg='gray', command=self.check_field_search)
+        self.NameSearchCheckbox = Checkbutton(frame1, text="이름 검색", font=self.TempFont2,
+                                              variable=self.NameSearchVar, bg='gray', command=self.check_name_search)
+        self.FieldSearchCheckbox = Checkbutton(frame1, text="분야 검색", font=self.TempFont2, variable=self.FieldSearchVar,
+                                               bg='gray', command=self.check_field_search)
         self.NameSearchCheckbox.place(relx=0.7, rely=0.5, anchor=CENTER)
         self.FieldSearchCheckbox.place(relx=0.85, rely=0.5, anchor=CENTER)
 
@@ -524,10 +553,140 @@ class MainGUI:
 
         self.SearchWindow.mainloop()
     def InitMap(self):
+        WIDTH = 1200
+        HEIGHT = 800
+
         self.window.destroy()
-        self.MapWindow = Tk()
-        self.MapWindow.geometry("1200x600")
-        self.MapWindow.mainloop()
+        self.mapwindow = Tk()
+
+        self.mapwindow.title("지도")
+        self.mapwindow.geometry(f"{WIDTH}x{HEIGHT}")
+
+        self.mapwindow.grid_columnconfigure(0, weight=1)
+        self.mapwindow.grid_columnconfigure(1, weight=0)
+        self.mapwindow.grid_columnconfigure(2, weight=0)
+        self.mapwindow.grid_rowconfigure(1, weight=1)
+
+        # 버튼 이미지
+        home_image = Image.open('image/Home.png').resize((40, 40))
+        home_image_tk = ImageTk.PhotoImage(home_image)
+
+        # 홈버튼
+        home = Button(self.mapwindow, width=85, height=85, image=home_image_tk, bg='white',
+                      command=self.MaptoHome)
+        home.place(x=5, y=5)
+
+        # 검색창
+        self.search_bar = Entry(self.mapwindow, width=40)
+        self.search_bar.grid(row=0, column=0, pady=42, padx=150, sticky="we")
+        self.search_bar.focus()
+
+        # 검색 버튼
+        self.search_bar_button = tkinter.Button(master=self.mapwindow, width=8, text="Search", command=self.search)
+        self.search_bar_button.grid(row=0, column=1, pady=10, padx=10)
+
+        # 검색 초기화 버튼
+        self.search_bar_clear = Button(master=self.mapwindow, width=8, text="Clear", command=self.clear)
+        self.search_bar_clear.grid(row=0, column=2, pady=10, padx=10)
+
+        # 지도
+        self.map_widget = TkinterMapView(width=WIDTH, height=600, corner_radius=0)
+        self.map_widget.grid(row=1, column=0, columnspan=3, sticky="nsew")
+
+        # 마커 리스트 박스
+        self.marker_list_box = Listbox(self.mapwindow, height=8)
+        self.marker_list_box.grid(row=2, column=0, columnspan=1, sticky="ew", padx=10, pady=10)
+
+        # 리스트 박스 버튼 프레임
+        self.listbox_button_frame = Frame(master=self.mapwindow)
+        self.listbox_button_frame.grid(row=2, column=1, sticky="nsew", columnspan=2)
+
+        self.listbox_button_frame.grid_columnconfigure(0, weight=1)
+
+        # 마커 세이브 버튼
+        self.save_marker_button = Button(master=self.listbox_button_frame, width=20, text="save current marker",
+                                         command=self.save_marker)
+        self.save_marker_button.grid(row=0, column=0, pady=10, padx=10)
+
+        # 마커 초기화 버튼
+        self.clear_marker_button = Button(master=self.listbox_button_frame, width=20, text="clear marker list",
+                                          command=self.clear_marker_list)
+        self.clear_marker_button.grid(row=1, column=0, pady=10, padx=10)
+
+        # 마커 연결 버튼
+        self.connect_marker_button = Button(master=self.listbox_button_frame, width=20, text="connect marker with path",
+                                            command=self.connect_marker)
+        self.connect_marker_button.grid(row=2, column=0, pady=10, padx=10)
+
+        # 초기 화면
+        self.map_widget.set_address('seoul')
+
+        # 데이터 불러오기 (수정)
+        # queryParams = {'serviceKey': self.service_key, "numOfRows": 100}
+        # response = requests.get(self.url1, params=queryParams)
+        # root = ET.fromstring(response.text)
+        # self.Hp_marker_list = {}
+        # for item in root.iter("item"):
+        #     HpName = item.findtext('dutyName')
+        #     HpLongitude = item.findtext('wgs84Lon')
+        #     HpLatitude = item.findtext('wgs84Lat')
+        #     self.Hp_marker_list[HpName] = [HpLongitude, HpLatitude]
+        #
+        # for k, v in self.Hp_marker_list.items():
+        #     self.map_widget.set_position(v[0], v[1], text=k, marker=True)
+
+        self.marker_list = []
+        self.marker_path = None
+
+        self.search_marker = None
+        self.search_in_progress = False
+
+        self.mapwindow.mainloop()
+
+    def search(self):
+        if not self.search_in_progress:
+            self.search_in_progress = True
+            if self.search_marker not in self.marker_list:
+                self.map_widget.delete(self.search_marker)
+
+            address = self.search_bar.get()
+            self.search_marker = self.map_widget.set_address(address, marker=True)
+            if self.search_marker is False:
+                # address was invalid (return value is False)
+                self.search_marker = None
+            self.search_in_progress = False
+
+    def save_marker(self):
+        if self.search_marker is not None:
+            self.marker_list_box.insert(tkinter.END, f" {len(self.marker_list)}. {self.search_marker.text} ")
+            self.marker_list_box.see(tkinter.END)
+            self.marker_list.append(self.search_marker)
+
+    def clear_marker_list(self):
+        for marker in self.marker_list:
+            self.map_widget.delete(marker)
+
+        self.marker_list_box.delete(0, tkinter.END)
+        self.marker_list.clear()
+        self.connect_marker()
+
+    def connect_marker(self):
+        print(self.marker_list)
+        position_list = []
+
+        for marker in self.marker_list:
+            position_list.append(marker.position)
+
+        if self.marker_path is not None:
+            self.map_widget.delete(self.marker_path)
+
+        if len(position_list) > 0:
+            self.marker_path = self.map_widget.set_path(position_list)
+
+    def clear(self):
+        self.search_bar.delete(0, last=tkinter.END)
+        self.map_widget.delete(self.search_marker)
+
     def InitSymptom(self):
         self.window.destroy()
         self.SymptomWindow = Tk()
@@ -537,6 +696,11 @@ class MainGUI:
     # 홈버튼 함수
     def SearchtoHome(self):
         self.SearchWindow.destroy()
+        self.InitMain()
+
+    def MaptoHome(self):
+        self.mapwindow.quit()
+        self.mapwindow.destroy()
         self.InitMain()
 
 
